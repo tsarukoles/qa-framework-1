@@ -18,6 +18,14 @@ Which Claude Code events are connected to which program in this project, and how
 |---|---|
 | 2026-10-18 | Task 05: recorder `scripts/vault-sync.mjs` created with `--from-hook` and `--session-start`; `PostToolUse` and `SessionStart` connected; isolated tests in `safety-tests/vault-log.test.mjs`. |
 | 2026-10-18 | Task 05 step 5: every new change-log entry ends with `· **commit:** <short HEAD>` (`unknown` when Git cannot say); older entries untouched; tests compare the field with the temporary repository's real short HEAD. |
+| 2026-10-18 | Task 06: guard `scripts/hooks/guard.mjs` connected to `PreToolUse` for `Edit\|Write`. Six checks (protected file name, token-shaped content, `.only` added, `.skip` added, fewer `expect(`, fewer `runIfEnv(` or `envGuard(`), then step 5 added the seventh (`waitForTimeout(` added). Exit 2 + `guard: BLOCKED — reason` refuses; exit 0 is silent; unreadable input exits 0 (fails open). Isolated tests in `safety-tests/guard.test.mjs`. |
+
+## What the guard covers and what it does not
+
+- It inspects only the text Claude proposes through `Edit` (`old_string` → `new_string`) and `Write` (`content`). A file saved in the editor or rewritten by a terminal command never passes through it.
+- A `Write` has no old text, so the guard cannot tell how many assertions or environment helpers a whole-file replacement removed; it only checks the new content for `.only`, `.skip`, `waitForTimeout(`, token shapes and the file name.
+- Unreadable input exits 0: the edit continues unchecked. That is a known limit, not protection.
+- Moving an assertion by deleting it in one edit and adding it in another is refused at the deletion; one edit that covers both places keeps the count and passes.
 
 ## Verification status
 
@@ -30,7 +38,7 @@ Which Claude Code events are connected to which program in this project, and how
 |---|---|---|---|
 | `PostToolUse` | `Edit\|Write` | `node scripts/vault-sync.mjs --from-hook` | Configured. Script verified. Live: not verified in this build. |
 | `SessionStart` | none (every start or resume) | `node scripts/vault-sync.mjs --session-start` | Configured. Script verified. Live: not verified in this build. |
-| `PreToolUse` | | | Planned for Task 06 (the edit guard). Not installed. |
+| `PreToolUse` | `Edit\|Write` | `node scripts/hooks/guard.mjs` | Configured (Task 06). Script verified: seven checks, each with a blocked and an allowed example. Live: not verified in this build. |
 | `Stop` | | | Planned for Task 07. Not installed. |
 | `FileChanged` | | | Optional editor watcher. **Not enabled** in this exercise. |
 
