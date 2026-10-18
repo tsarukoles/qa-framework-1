@@ -1,0 +1,13 @@
+# Saved raw drafts stay byte-for-byte as they passed (Tasks 01 and 04).
+evidence/*-raw-draft.ts
+# The supplied Jira seed package is imported as delivered.
+jira-seed/
+scripts/jira-seed.mjs
+# Generated records and tool output.
+vault/_changelog/
+node_modules/
+test-results/
+playwright-report/
+package-lock.json
+# Managed spec notes: their generated block is written by vault-sync, never by Prettier.
+vault/tests/
