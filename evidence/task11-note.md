@@ -86,4 +86,4 @@ A broken link appended to `vault/_context.md` (`[a note that does not exist](tes
 
 ## The normal commit
 
-Commit `Task 11: keep spec notes current with freshness and link checks` went through the full pre-commit chain: `secret-scan: 14 staged file(s) clean`, `vault-precommit.mjs --safety` (no staged spec, exit 0), lint-staged (Prettier and ESLint on the staged files), `vault-precommit.mjs --refresh` (no staged spec, nothing to refresh). No note changed during the commit, so this evidence update is the only follow-up.
+Commit `Task 11: keep spec notes current with freshness and link checks` went through the full pre-commit chain: `secret-scan: 17 staged file(s) clean`, `vault-precommit.mjs --safety` (no staged spec, exit 0), lint-staged (Prettier and ESLint on the staged files), `vault-precommit.mjs --refresh` (no staged spec, nothing to refresh). No note changed during the commit, so this evidence update is the only follow-up.
