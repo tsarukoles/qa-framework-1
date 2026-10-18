@@ -4,7 +4,7 @@
 // from pieces so that no test file contains a token-shaped string.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { describe, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
@@ -215,4 +215,58 @@ describe('guard: the hard-wait rule (check 7, added in step 5)', () => {
     ));
   test('7 does not apply outside specs', () =>
     allowed(edit('pages/BasePage.ts', '', 'await this.page.waitForTimeout(1);')));
+});
+
+describe('guard: Task 09 reminder for listed CRITICAL files (exit 0, never a decision)', () => {
+  const REMINDER = 'guard: WARN — shared file; review the affected callers before approving';
+  function warned(result) {
+    assert.equal(result.code, 0, `expected exit 0: ${result.err}`);
+    assert.equal(result.err, '', 'a reminder is not a refusal');
+    const json = JSON.parse(result.out.trim());
+    assert.equal(json.systemMessage, REMINDER);
+    assert.equal(json.hookSpecificOutput.hookEventName, 'PreToolUse');
+    assert.equal(json.hookSpecificOutput.additionalContext, REMINDER);
+    assert.equal('permissionDecision' in json.hookSpecificOutput, false);
+    assert.equal('permissionDecision' in json, false);
+    return json;
+  }
+  function quiet(result) {
+    allowed(result);
+    assert.equal(result.out, '', 'an ordinary edit prints nothing');
+  }
+
+  test('an otherwise permitted edit to a listed path (relative form) prints the warning JSON', () =>
+    warned(
+      edit(
+        'env/target.ts',
+        "dev: 'https://dev.ai-orchestration-courses.com',",
+        "dev: 'https://dev.ai-orchestration-courses.com', // reviewed",
+      ),
+    ));
+  test('the same listed file given as an absolute path in the platform form', () =>
+    warned(
+      edit(
+        join(process.cwd(), 'tests', 'support', 'users.ts'),
+        "email: 'author@codemify.test',",
+        "email: 'author@codemify.test', // reviewed",
+      ),
+    ));
+  test('a listed hook file written whole also gets the reminder', () =>
+    warned(
+      write(
+        '.husky/pre-push',
+        'node scripts/hooks/pre-push-check.mjs\nnpm run typecheck\nnpm run test:list\n',
+      ),
+    ));
+  test('an ordinary edit outside the list prints nothing', () =>
+    quiet(edit('pages/BasePage.ts', 'readonly page: Page;', 'readonly page: Page; // shared')));
+  test('a spec edit is not listed either', () =>
+    quiet(edit(SPEC, 'await categories.open();', 'await categories.open(); // reviewed')));
+  test('a refusal keeps priority: token-shaped content written to a listed file returns 2 and no JSON', () => {
+    const result = write('.claude/settings.json', `{ "token": "${slackSample}" }`);
+    blocked(result, 'token-shaped');
+    assert.equal(result.out, '');
+  });
+  test('a path outside the project is never treated as listed', () =>
+    quiet(edit(join(process.cwd(), '..', 'env', 'target.ts'), 'a', 'b')));
 });

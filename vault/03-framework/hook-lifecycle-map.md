@@ -81,3 +81,7 @@ Matcher: omitted, so it applies to all session endings.
 Behavior: append a closing journal line so a reviewer can see when the session ended.
 
 Recorded in Task 05 as documentation only; Task 07 built `--session-end`, tested it, and connected it (see the table above).
+
+## Task 09 addition: the CRITICAL-file reminder
+
+After the seven refusal checks pass, `scripts/hooks/guard.mjs` compares the proposal's path with its explicit list of 19 CRITICAL paths (the tier table in `.claude/rules/01-guardrails.md`). A listed path prints `guard: WARN — shared file; review the affected callers before approving` as `systemMessage` and `additionalContext` and exits 0. It is a reminder, not a permission decision. Configured and script verified (7 isolated cases); live: not verified in this build.

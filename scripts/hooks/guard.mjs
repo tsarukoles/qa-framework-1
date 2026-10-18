@@ -20,6 +20,7 @@
  * Node built-ins only. It never opens files, so a secret file is never read.
  */
 import { readFileSync } from 'node:fs';
+import { isAbsolute, relative, resolve } from 'node:path';
 
 // Detector prefixes are assembled from pieces so this file never contains a token-shaped string.
 const SLACK_BOT = ['xox', 'b-'].join('');
@@ -72,6 +73,41 @@ function looksLikeSecret(text) {
 }
 
 const count = (text, re) => (text.match(re) ?? []).length;
+
+// Task 09: the explicit list of CRITICAL shared files (the tier table lives in
+// .claude/rules/01-guardrails.md; that Markdown table does not update this list).
+// A listed path gets a review reminder after every refusal check passed. Exit stays 0.
+const ROOT = resolve(process.env.CLAUDE_PROJECT_DIR || process.cwd());
+const CRITICAL_PATHS = new Set([
+  'playwright.config.ts',
+  'tsconfig.json',
+  'package.json',
+  'eslint.config.mjs',
+  '.prettierrc.json',
+  'env/target.ts',
+  'env/runIfEnv.ts',
+  'env/envGuard.ts',
+  'tests/support/env.ts',
+  'tests/support/users.ts',
+  '.claude/settings.json',
+  '.husky/pre-commit',
+  '.husky/pre-push',
+  'scripts/hooks/guard.mjs',
+  'scripts/hooks/secret-scan.mjs',
+  'scripts/hooks/pre-push-check.mjs',
+  'scripts/hooks/stop-worklog.mjs',
+  'scripts/hooks/session-preflight.mjs',
+  'scripts/vault-sync.mjs',
+]);
+const CRITICAL_REMINDER = 'guard: WARN — shared file; review the affected callers before approving';
+
+/** The project-relative, forward-slash form of a path; empty when it is outside the project. */
+function projectRelative(filePath) {
+  if (!filePath) return '';
+  const absolute = isAbsolute(filePath) ? resolve(filePath) : resolve(ROOT, filePath);
+  const rel = relative(ROOT, absolute).replace(/\\/g, '/');
+  return rel === '' || rel === '..' || rel.startsWith('../') || isAbsolute(rel) ? '' : rel;
+}
 
 function main() {
   const payload = readInput();
@@ -145,6 +181,16 @@ function main() {
         `this edit adds waitForTimeout( to ${base}. Wait for the condition the test actually needs, for example await expect(locator).toBeVisible(), which retries until it is true.`,
       );
     }
+  }
+
+  // Task 09: a listed CRITICAL file gets a reminder, never a decision (no permissionDecision).
+  if (CRITICAL_PATHS.has(projectRelative(filePath))) {
+    process.stdout.write(
+      JSON.stringify({
+        systemMessage: CRITICAL_REMINDER,
+        hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: CRITICAL_REMINDER },
+      }) + '\n',
+    );
   }
   return 0;
 }
