@@ -83,3 +83,7 @@ No executable test code changed in this task; the five-test browser result from 
 ## Hand run on the real vault (the pre-push check path)
 
 A broken link appended to `vault/_context.md` (`[a note that does not exist](tests/blog/nope.md)`): `node scripts/validate-vault.mjs` printed `ERROR _context.md: broken markdown -> tests/blog/nope.md`, `8 file(s), 1 error(s), 0 warning(s)`, exit 1. After restoring the file: `8 file(s), 0 error(s), 0 warning(s)`, exit 0. The file was restored byte for byte.
+
+## The normal commit
+
+Commit `Task 11: keep spec notes current with freshness and link checks` went through the full pre-commit chain: `secret-scan: 14 staged file(s) clean`, `vault-precommit.mjs --safety` (no staged spec, exit 0), lint-staged (Prettier and ESLint on the staged files), `vault-precommit.mjs --refresh` (no staged spec, nothing to refresh). No note changed during the commit, so this evidence update is the only follow-up.
