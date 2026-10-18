@@ -112,10 +112,22 @@ function modeSessionStart() {
   return 0;
 }
 
-const modes = { '--from-hook': modeFromHook, '--session-start': modeSessionStart };
+/** Task 07: the closing line. Files in new folders count, because --untracked-files=all lists each one. */
+function modeSessionEnd() {
+  const commit = git(['rev-parse', '--short', 'HEAD'], 'unknown');
+  const status = git(['status', '--porcelain', '--untracked-files=all'], '');
+  const uncommitted = status === '' ? 0 : status.split(/\r?\n/).filter((line) => line.length > 0).length;
+  appendLine(
+    resolve(CHANGELOG_DIR, 'sessions.log'),
+    `- session END ${utcNow()} · commit ${commit} · uncommitted ${uncommitted} file(s)\n`,
+  );
+  return 0;
+}
+
+const modes = { '--from-hook': modeFromHook, '--session-start': modeSessionStart, '--session-end': modeSessionEnd };
 const mode = process.argv[2];
 if (!modes[mode]) {
-  console.error('usage: node scripts/vault-sync.mjs --from-hook | --session-start');
+  console.error('usage: node scripts/vault-sync.mjs --from-hook | --session-start | --session-end');
   process.exit(2);
 }
 try {

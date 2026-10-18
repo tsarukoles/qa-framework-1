@@ -34,6 +34,34 @@
             "command": "node scripts/vault-sync.mjs --session-start"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/hooks/session-preflight.mjs"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/hooks/stop-worklog.mjs"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/vault-sync.mjs --session-end"
+          }
+        ]
       }
     ]
   }

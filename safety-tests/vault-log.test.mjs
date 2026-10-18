@@ -156,6 +156,26 @@ describe('vault-sync --from-hook in a temporary repository', () => {
     for (const line of lines) assert.match(line, /^- session START \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
   });
 
+  test('--session-end appends an END line with the UTC time, the short commit and the uncommitted count including nested untracked files', () => {
+    const log = join(root, 'vault', '_changelog', 'sessions.log');
+    const before = readFileSync(log, 'utf8');
+    mkdirSync(join(root, 'brand-new', 'nested'), { recursive: true });
+    writeFileSync(join(root, 'brand-new', 'nested', 'one.ts'), '');
+    writeFileSync(join(root, 'brand-new', 'nested', 'two.ts'), '');
+    const head = git(root, 'rev-parse', '--short', 'HEAD').stdout.trim();
+    const result = run(root, '--session-end', '');
+    assert.equal(result.status, 0, result.stderr);
+    const after = readFileSync(log, 'utf8');
+    assert.ok(after.startsWith(before), 'earlier lines preserved');
+    const last = after.trimEnd().split('\n').at(-1);
+    assert.match(last, /^- session END \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z · commit [0-9a-f]+ · uncommitted \d+ file\(s\)$/);
+    assert.ok(last.includes(` · commit ${head} · `), last);
+    const expected = git(root, 'status', '--porcelain', '--untracked-files=all').stdout.split('\n').filter(Boolean).length;
+    assert.ok(expected >= 2, 'the nested untracked files are counted by git');
+    assert.ok(last.endsWith(` · uncommitted ${expected} file(s)`), last);
+    rmSync(join(root, 'brand-new'), { recursive: true, force: true });
+  });
+
   test('an unknown mode prints usage and exits 2 without writing', () => {
     const before = changelog(root);
     const result = run(root, '--nope', '');
@@ -208,5 +228,12 @@ describe('vault-sync --from-hook in a repository without any commit', () => {
     assert.equal(entries(text), 1);
     assert.ok(text.includes(`**who:** Fresh Author@${hostname()} · **branch:** main\n`));
     assert.ok(text.includes('**why (last commit):** unknown · **commit:** unknown\n'));
+  });
+
+  test('--session-end without a commit writes "commit unknown" and still counts the files', () => {
+    const result = run(root, '--session-end', '');
+    assert.equal(result.status, 0, result.stderr);
+    const last = readFileSync(join(root, 'vault', '_changelog', 'sessions.log'), 'utf8').trimEnd().split('\n').at(-1);
+    assert.match(last, /^- session END \S+ · commit unknown · uncommitted \d+ file\(s\)$/);
   });
 });
