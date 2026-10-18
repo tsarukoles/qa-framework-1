@@ -9,3 +9,5 @@ node_modules/
 test-results/
 playwright-report/
 package-lock.json
+# Managed spec notes: their generated block is written by vault-sync, never by Prettier.
+vault/tests/

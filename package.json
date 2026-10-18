@@ -5,12 +5,15 @@
     "test": "cross-env APP_ENV=dev playwright test",
     "test:prod": "cross-env APP_ENV=prod playwright test",
     "test:list": "cross-env APP_ENV=dev playwright test --list",
-    "test:safety": "tsx --test safety/target.test.ts safety/helpers.test.ts safety-tests/vault-log.test.mjs safety-tests/guard.test.mjs safety-tests/worklog.test.mjs",
+    "test:safety": "tsx --test safety/target.test.ts safety/helpers.test.ts safety-tests/vault-log.test.mjs safety-tests/guard.test.mjs safety-tests/worklog.test.mjs safety-tests/vault-sync.test.mjs safety-tests/validate-vault.test.mjs",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "vault:sync": "node scripts/vault-sync.mjs --write",
+    "vault:check": "node scripts/vault-sync.mjs --check",
+    "vault:validate": "node scripts/validate-vault.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

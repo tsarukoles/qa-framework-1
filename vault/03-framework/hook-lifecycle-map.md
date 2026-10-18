@@ -85,3 +85,7 @@ Recorded in Task 05 as documentation only; Task 07 built `--session-end`, tested
 ## Task 09 addition: the CRITICAL-file reminder
 
 After the seven refusal checks pass, `scripts/hooks/guard.mjs` compares the proposal's path with its explicit list of 19 CRITICAL paths (the tier table in `.claude/rules/01-guardrails.md`). A listed path prints `guard: WARN — shared file; review the affected callers before approving` as `systemMessage` and `additionalContext` and exits 0. It is a reminder, not a permission decision. Configured and script verified (7 isolated cases); live: not verified in this build.
+
+## Task 11 addition: spec notes refreshed by the recorder
+
+The `PostToolUse` recorder (`node scripts/vault-sync.mjs --from-hook`) now also refreshes the generated block of `vault/tests/<path>.md` when the changed file is a supported spec under `tests/`. It never stages anything and stays fail-open: an unsupported spec is reported on stderr and the edit continues. The same generator runs in the Git hooks: `pre-commit` refreshes and stages the notes of the specs being committed (`scripts/hooks/vault-precommit.mjs`), `pre-push` runs `vault-sync --check` and `validate-vault`. Configured and script verified (isolated tests in `safety-tests/vault-sync.test.mjs`); live: not verified in this build.

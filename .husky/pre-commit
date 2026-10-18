@@ -1,2 +1,4 @@
 node scripts/hooks/secret-scan.mjs
+node scripts/hooks/vault-precommit.mjs --safety
 npx lint-staged --concurrent false
+node scripts/hooks/vault-precommit.mjs --refresh
