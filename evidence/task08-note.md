@@ -76,3 +76,7 @@ Both examples were removed; `npm run lint` and `npm run format:check` exit 0 aft
 - Git hooks run only where Husky is installed; `--no-verify` or `HUSKY=0` skips them and leaves no trace. The project rule forbids both; the reviewed pull request is the check that remains.
 - The scan detects its listed shapes only; a secret in another shape passes it.
 - `.mjs` scripts are linted but not type-checked; the isolated safety tests cover their behaviour.
+
+## Step 6: clean installation check
+
+A fresh `git clone` of this repository (branch `week-2` at the setup commit) into a temporary folder, then `npm ci`: exit 0, the lock file unchanged, `prepare` ran Husky, `core.hooksPath = .husky/_` and `.husky/_` present in the clone. No `.env` was copied, no Jira import ran, no browser was started. Installed in the clone: TypeScript 6.0.3, ESLint 10.7.0, Prettier 3.9.5, Husky 9.1.7.
