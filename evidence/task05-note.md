@@ -8,13 +8,13 @@ Recorded 2026-10-18 on branch `week-2`. Only results that were observed are writ
 
 ## What was built
 
-| File | Purpose |
-|---|---|
-| `scripts/vault-sync.mjs` | The recorder. `--from-hook` reads one hook event from stdin and appends one entry to `vault/_changelog/<local date>.md`; `--session-start` appends `- session START <UTC>` to `vault/_changelog/sessions.log`. Logging modes always exit 0. |
-| `.claude/settings.json` | `PostToolUse` (matcher `Edit\|Write`) and `SessionStart` run the two commands. Permissions unchanged. |
-| `safety-tests/vault-log.test.mjs` | node:test checks that run the script by absolute path inside temporary Git repositories, passing JSON through `spawnSync`'s `input`. |
-| `package.json` | `test:safety` now runs the Week 1 files plus `safety-tests/vault-log.test.mjs`. |
-| `vault/_map.md`, `vault/_raw/.gitkeep`, `vault/03-framework/hook-lifecycle-map.md` | The vault skeleton and the hook map (configured / script verified / live verified / planned). |
+| File                                                                               | Purpose                                                                                                                                                                                                                                     |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scripts/vault-sync.mjs`                                                           | The recorder. `--from-hook` reads one hook event from stdin and appends one entry to `vault/_changelog/<local date>.md`; `--session-start` appends `- session START <UTC>` to `vault/_changelog/sessions.log`. Logging modes always exit 0. |
+| `.claude/settings.json`                                                            | `PostToolUse` (matcher `Edit\|Write`) and `SessionStart` run the two commands. Permissions unchanged.                                                                                                                                       |
+| `safety-tests/vault-log.test.mjs`                                                  | node:test checks that run the script by absolute path inside temporary Git repositories, passing JSON through `spawnSync`'s `input`.                                                                                                        |
+| `package.json`                                                                     | `test:safety` now runs the Week 1 files plus `safety-tests/vault-log.test.mjs`.                                                                                                                                                             |
+| `vault/_map.md`, `vault/_raw/.gitkeep`, `vault/03-framework/hook-lifecycle-map.md` | The vault skeleton and the hook map (configured / script verified / live verified / planned).                                                                                                                                               |
 
 Project root for the recorder: `VAULT_SYNC_ROOT` (isolated tests), else `CLAUDE_PROJECT_DIR` (Claude Code sets it for hook commands), else the working directory. Claude Code runs hook commands with the session's start folder as the working directory, so `node scripts/vault-sync.mjs` resolves only when the session was started in the folder that holds `package.json`.
 
@@ -22,13 +22,13 @@ Project root for the recorder: `VAULT_SYNC_ROOT` (isolated tests), else `CLAUDE_
 
 Temporary repository under the system temp folder, one commit (`Task 04: review and improve AI-generated tests`, short ID `ef0051d`), branch `week-2`, selected with `VAULT_SYNC_ROOT`. The real project was not touched (its `vault/_changelog/` does not exist).
 
-| # | Input on stdin | Before | After | Exit |
-|---|---|---|---|---|
-| 1 | `{"tool_input":{"file_path":"tests/blog/home.smoke.spec.ts"}}` | no `vault/_changelog/` folder | `vault/_changelog/2026-10-18.md` created with exactly one entry (below) | 0 |
-| 2 | `{"tool_input":{"file_path":"vault/_map.md"}}` | 1 entry | unchanged (same md5) | 0 |
-| 3 | `not json` | 1 entry | unchanged | 0 |
-| 4 | `--session-start`, nothing on stdin | no `sessions.log` | `- session START 2026-10-18T19:31:11Z` | 0 |
-| 5 | `{"tool_input":{"file_path":"C:\\...\\pages\\BlogListPage.ts"}}` (absolute Windows path) | 1 entry | 2 entries; the first entry's bytes unchanged; the new entry says `pages/BlogListPage.ts` with forward slashes | 0 |
+| #   | Input on stdin                                                                           | Before                        | After                                                                                                         | Exit |
+| --- | ---------------------------------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------- | ---- |
+| 1   | `{"tool_input":{"file_path":"tests/blog/home.smoke.spec.ts"}}`                           | no `vault/_changelog/` folder | `vault/_changelog/2026-10-18.md` created with exactly one entry (below)                                       | 0    |
+| 2   | `{"tool_input":{"file_path":"vault/_map.md"}}`                                           | 1 entry                       | unchanged (same md5)                                                                                          | 0    |
+| 3   | `not json`                                                                               | 1 entry                       | unchanged                                                                                                     | 0    |
+| 4   | `--session-start`, nothing on stdin                                                      | no `sessions.log`             | `- session START 2026-10-18T19:31:11Z`                                                                        | 0    |
+| 5   | `{"tool_input":{"file_path":"C:\\...\\pages\\BlogListPage.ts"}}` (absolute Windows path) | 1 entry                       | 2 entries; the first entry's bytes unchanged; the new entry says `pages/BlogListPage.ts` with forward slashes | 0    |
 
 Entry written by sample 1 (the computer name is shown as `<host>` here):
 

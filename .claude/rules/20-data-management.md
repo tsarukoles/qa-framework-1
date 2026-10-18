@@ -1,7 +1,7 @@
 ---
 paths:
-  - "tests/**"
-  - "tests/support/**"
+  - 'tests/**'
+  - 'tests/support/**'
 ---
 
 # Test data

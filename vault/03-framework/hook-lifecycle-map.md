@@ -14,11 +14,11 @@ Which Claude Code events are connected to which program in this project, and how
 
 ## Timeline of edits to this setup
 
-| Date | Change |
-|---|---|
-| 2026-10-18 | Task 05: recorder `scripts/vault-sync.mjs` created with `--from-hook` and `--session-start`; `PostToolUse` and `SessionStart` connected; isolated tests in `safety-tests/vault-log.test.mjs`. |
-| 2026-10-18 | Task 05 step 5: every new change-log entry ends with `· **commit:** <short HEAD>` (`unknown` when Git cannot say); older entries untouched; tests compare the field with the temporary repository's real short HEAD. |
-| 2026-10-18 | Task 07: `scripts/hooks/session-preflight.mjs` added to `SessionStart`; `scripts/hooks/stop-worklog.mjs` connected to `Stop`; `.claude/commands/worklog.md` created; `--session-end` added to the recorder and connected to `SessionEnd`; tests in `safety-tests/worklog.test.mjs` and `vault-log.test.mjs`. |
+| Date       | Change                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-10-18 | Task 05: recorder `scripts/vault-sync.mjs` created with `--from-hook` and `--session-start`; `PostToolUse` and `SessionStart` connected; isolated tests in `safety-tests/vault-log.test.mjs`.                                                                                                                                                                                                                                                 |
+| 2026-10-18 | Task 05 step 5: every new change-log entry ends with `· **commit:** <short HEAD>` (`unknown` when Git cannot say); older entries untouched; tests compare the field with the temporary repository's real short HEAD.                                                                                                                                                                                                                          |
+| 2026-10-18 | Task 07: `scripts/hooks/session-preflight.mjs` added to `SessionStart`; `scripts/hooks/stop-worklog.mjs` connected to `Stop`; `.claude/commands/worklog.md` created; `--session-end` added to the recorder and connected to `SessionEnd`; tests in `safety-tests/worklog.test.mjs` and `vault-log.test.mjs`.                                                                                                                                  |
 | 2026-10-18 | Task 06: guard `scripts/hooks/guard.mjs` connected to `PreToolUse` for `Edit\|Write`. Six checks (protected file name, token-shaped content, `.only` added, `.skip` added, fewer `expect(`, fewer `runIfEnv(` or `envGuard(`), then step 5 added the seventh (`waitForTimeout(` added). Exit 2 + `guard: BLOCKED — reason` refuses; exit 0 is silent; unreadable input exits 0 (fails open). Isolated tests in `safety-tests/guard.test.mjs`. |
 
 ## What the guard covers and what it does not
@@ -35,24 +35,24 @@ Which Claude Code events are connected to which program in this project, and how
 
 ## The real hook settings
 
-| Event | Matcher | Command | Status |
-|---|---|---|---|
-| `PostToolUse` | `Edit\|Write` | `node scripts/vault-sync.mjs --from-hook` | Configured. Script verified. Live: not verified in this build. |
-| `SessionStart` | none (every start or resume) | `node scripts/vault-sync.mjs --session-start` and, as a second entry, `node scripts/hooks/session-preflight.mjs` | Configured. Script verified (START line; five-line summary). Live: not verified in this build. |
-| `PreToolUse` | `Edit\|Write` | `node scripts/hooks/guard.mjs` | Configured (Task 06). Script verified: seven checks, each with a blocked and an allowed example. Live: not verified in this build. |
-| `Stop` | none | `node scripts/hooks/stop-worklog.mjs` | Configured (Task 07). Script verified: the five decisions. Live: not verified in this build. |
-| `SessionEnd` | none | `node scripts/vault-sync.mjs --session-end` | Configured (Task 07, replaces the earlier proposal below). Script verified (END line). Live: not verified in this build. |
-| `FileChanged` | | | Optional editor watcher. **Not enabled** in this exercise. |
+| Event          | Matcher                      | Command                                                                                                          | Status                                                                                                                             |
+| -------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `PostToolUse`  | `Edit\|Write`                | `node scripts/vault-sync.mjs --from-hook`                                                                        | Configured. Script verified. Live: not verified in this build.                                                                     |
+| `SessionStart` | none (every start or resume) | `node scripts/vault-sync.mjs --session-start` and, as a second entry, `node scripts/hooks/session-preflight.mjs` | Configured. Script verified (START line; five-line summary). Live: not verified in this build.                                     |
+| `PreToolUse`   | `Edit\|Write`                | `node scripts/hooks/guard.mjs`                                                                                   | Configured (Task 06). Script verified: seven checks, each with a blocked and an allowed example. Live: not verified in this build. |
+| `Stop`         | none                         | `node scripts/hooks/stop-worklog.mjs`                                                                            | Configured (Task 07). Script verified: the five decisions. Live: not verified in this build.                                       |
+| `SessionEnd`   | none                         | `node scripts/vault-sync.mjs --session-end`                                                                      | Configured (Task 07, replaces the earlier proposal below). Script verified (END line). Live: not verified in this build.           |
+| `FileChanged`  |                              |                                                                                                                  | Optional editor watcher. **Not enabled** in this exercise.                                                                         |
 
 ## The five events and their roles
 
-| Event | When | What this project does there | Can it block? |
-|---|---|---|---|
-| `SessionStart` | a session starts or resumes | appends `- session START <UTC>` to `sessions.log`; prints the five-line summary (date, branch, uncommitted count, latest journal, map) into the conversation | no |
-| `PreToolUse` | before `Edit` or `Write` runs | the guard inspects the proposal; exit 2 refuses it with a reason | yes: exit 2 stops that tool call |
-| `PostToolUse` | after `Edit` or `Write` succeeded | the recorder appends one change-log entry | no (the file already changed) |
-| `Stop` | Claude finished a response | the reminder checks for today's `## HH:MM` journal heading when work happened today; exit 2 asks Claude to continue and write it; `stop_hook_active` prevents a loop | yes: exit 2 means "not finished yet", it reverses nothing |
-| `SessionEnd` | the session ends | appends `- session END <UTC> · commit <short> · uncommitted <n> file(s)` to `sessions.log` | no |
+| Event          | When                              | What this project does there                                                                                                                                         | Can it block?                                             |
+| -------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `SessionStart` | a session starts or resumes       | appends `- session START <UTC>` to `sessions.log`; prints the five-line summary (date, branch, uncommitted count, latest journal, map) into the conversation         | no                                                        |
+| `PreToolUse`   | before `Edit` or `Write` runs     | the guard inspects the proposal; exit 2 refuses it with a reason                                                                                                     | yes: exit 2 stops that tool call                          |
+| `PostToolUse`  | after `Edit` or `Write` succeeded | the recorder appends one change-log entry                                                                                                                            | no (the file already changed)                             |
+| `Stop`         | Claude finished a response        | the reminder checks for today's `## HH:MM` journal heading when work happened today; exit 2 asks Claude to continue and write it; `stop_hook_active` prevents a loop | yes: exit 2 means "not finished yet", it reverses nothing |
+| `SessionEnd`   | the session ends                  | appends `- session END <UTC> · commit <short> · uncommitted <n> file(s)` to `sessions.log`                                                                           | no                                                        |
 
 The commands are relative to the project root. Claude Code runs hook commands with the folder the session started in as the working directory and sets `CLAUDE_PROJECT_DIR` to it. The recorder uses that folder as the project root (an isolated test can override it with `VAULT_SYNC_ROOT`). A session started one folder above the project loads none of these hooks and the command would not resolve; start Claude Code in the folder that holds `package.json`.
 

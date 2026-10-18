@@ -1,6 +1,6 @@
 ---
 description: Append today's work journal entry (Did / Worked / didn't / Next) to vault/12-progress-report/<you>/<date>.md. The Stop reminder points here.
-argument-hint: "[optional note to seed the entry]"
+argument-hint: '[optional note to seed the entry]'
 ---
 
 Append a short, honest entry about this session's work to today's journal file.

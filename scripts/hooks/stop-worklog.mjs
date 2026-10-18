@@ -26,7 +26,11 @@ const QUALIFYING = /\.(ts|mjs|json|md|sh)$/i;
 
 function git(args, fallback) {
   try {
-    const result = spawnSync('git', args, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+    const result = spawnSync('git', args, {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
     const out = result.status === 0 ? (result.stdout || '').trim() : '';
     return out || fallback;
   } catch {
@@ -82,7 +86,7 @@ if (process.argv[2] === '--path') {
 
 let payload;
 try {
-  payload = JSON.parse(readFileSync(0, 'utf8').replace(/^﻿+/, ''));
+  payload = JSON.parse(readFileSync(0, 'utf8').replace(/^\uFEFF+/, ''));
 } catch {
   process.exit(0);
 }

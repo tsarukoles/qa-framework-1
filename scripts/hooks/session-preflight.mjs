@@ -21,7 +21,11 @@ const JOURNAL_DIR = 'vault/12-progress-report';
 
 function git(args, fallback) {
   try {
-    const result = spawnSync('git', args, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+    const result = spawnSync('git', args, {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
     const out = result.status === 0 ? (result.stdout || '').trim() : '';
     return out || fallback;
   } catch {
@@ -58,7 +62,10 @@ function latestJournal() {
 }
 
 try {
-  const branch = git(['symbolic-ref', '--short', 'HEAD'], git(['rev-parse', '--abbrev-ref', 'HEAD'], 'no-branch'));
+  const branch = git(
+    ['symbolic-ref', '--short', 'HEAD'],
+    git(['rev-parse', '--abbrev-ref', 'HEAD'], 'no-branch'),
+  );
   const lines = [
     `Date: ${localDate()}`,
     `Branch: ${branch}`,

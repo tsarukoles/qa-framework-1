@@ -1,0 +1,3 @@
+node scripts/hooks/pre-push-check.mjs
+npm run typecheck
+npm run test:list

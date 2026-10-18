@@ -28,12 +28,12 @@ Playwright + TypeScript tests for the course applications. Work on the weekly br
 
 ## Detailed rules
 
-| File | Applies to | When it loads |
-|---|---|---|
-| `.claude/rules/01-guardrails.md` | the whole project | every conversation |
-| `.claude/rules/10-playwright-pom.md` | `tests/**`, `pages/**` | when a matching file is read or edited |
+| File                                  | Applies to                                | When it loads                          |
+| ------------------------------------- | ----------------------------------------- | -------------------------------------- |
+| `.claude/rules/01-guardrails.md`      | the whole project                         | every conversation                     |
+| `.claude/rules/10-playwright-pom.md`  | `tests/**`, `pages/**`                    | when a matching file is read or edited |
 | `.claude/rules/20-data-management.md` | `tests/**` (including `tests/support/**`) | when a matching file is read or edited |
-| `.claude/rules/30-test-names.md` | `tests/**` | when a matching file is read or edited |
+| `.claude/rules/30-test-names.md`      | `tests/**`                                | when a matching file is read or edited |
 
 ## Layout
 

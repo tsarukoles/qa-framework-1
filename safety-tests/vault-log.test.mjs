@@ -72,34 +72,56 @@ describe('vault-sync --from-hook in a temporary repository', () => {
     assert.equal(result.stderr, '');
     const text = changelog(root);
     assert.equal(entries(text), 1);
-    assert.match(text, /^- \*\*when:\*\* \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z · \*\*who:\*\* Test Author@/m);
+    assert.match(
+      text,
+      /^- \*\*when:\*\* \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z · \*\*who:\*\* Test Author@/m,
+    );
     assert.ok(text.includes(`@${hostname()} · **branch:** week-2\n`));
-    assert.ok(text.includes(`  **what:** ${SPEC} · **why (last commit):** Task 04: review the tests · **commit:** `));
+    assert.ok(
+      text.includes(
+        `  **what:** ${SPEC} · **why (last commit):** Task 04: review the tests · **commit:** `,
+      ),
+    );
     assert.ok(existsSync(changelogPath(root)), 'the file name is the local date');
   });
 
-  test('the commit field is the temporary repository\'s actual short HEAD, whatever its length', () => {
+  test("the commit field is the temporary repository's actual short HEAD, whatever its length", () => {
     const head = git(root, 'rev-parse', '--short', 'HEAD').stdout.trim();
     assert.ok(head.length >= 4, 'the temporary repository has a commit');
     const text = changelog(root);
     const last = text.trimEnd().split('\n').at(-1);
-    assert.ok(last.endsWith(` · **commit:** ${head}`), `${last} should end with the short HEAD ${head}`);
+    assert.ok(
+      last.endsWith(` · **commit:** ${head}`),
+      `${last} should end with the short HEAD ${head}`,
+    );
   });
 
   test('a FileChanged event with a top-level absolute path records the same project-relative path', () => {
     const before = entries(changelog(root));
-    const result = run(root, '--from-hook', JSON.stringify({ file_path: join(root, 'tests', 'blog', 'home.smoke.spec.ts') }));
+    const result = run(
+      root,
+      '--from-hook',
+      JSON.stringify({ file_path: join(root, 'tests', 'blog', 'home.smoke.spec.ts') }),
+    );
     assert.equal(result.status, 0);
     const text = changelog(root);
     assert.equal(entries(text), before + 1);
     const head = git(root, 'rev-parse', '--short', 'HEAD').stdout.trim();
-    assert.ok(text.endsWith(`  **what:** ${SPEC} · **why (last commit):** Task 04: review the tests · **commit:** ${head}\n`));
+    assert.ok(
+      text.endsWith(
+        `  **what:** ${SPEC} · **why (last commit):** Task 04: review the tests · **commit:** ${head}\n`,
+      ),
+    );
     assert.ok(!text.includes('\\'), 'paths are stored with forward slashes');
   });
 
   test('entries are appended; earlier entries are preserved byte for byte', () => {
     const before = changelog(root);
-    const result = run(root, '--from-hook', JSON.stringify({ tool_input: { file_path: 'pages/BlogListPage.ts' } }));
+    const result = run(
+      root,
+      '--from-hook',
+      JSON.stringify({ tool_input: { file_path: 'pages/BlogListPage.ts' } }),
+    );
     assert.equal(result.status, 0);
     const after = changelog(root);
     assert.ok(after.startsWith(before));
@@ -109,7 +131,12 @@ describe('vault-sync --from-hook in a temporary repository', () => {
 
   test('the vault folder and every path inside it add nothing', () => {
     const before = changelog(root);
-    for (const p of ['vault', 'vault/_map.md', join(root, 'vault', '_changelog', 'x.md'), 'vault/03-framework/hook-lifecycle-map.md']) {
+    for (const p of [
+      'vault',
+      'vault/_map.md',
+      join(root, 'vault', '_changelog', 'x.md'),
+      'vault/03-framework/hook-lifecycle-map.md',
+    ]) {
       const result = run(root, '--from-hook', JSON.stringify({ tool_input: { file_path: p } }));
       assert.equal(result.status, 0, p);
     }
@@ -121,14 +148,26 @@ describe('vault-sync --from-hook in a temporary repository', () => {
     const outside = join(tmpdir(), 'vault-log-outside.txt');
     const result = run(root, '--from-hook', JSON.stringify({ tool_input: { file_path: outside } }));
     assert.equal(result.status, 0);
-    const up = run(root, '--from-hook', JSON.stringify({ tool_input: { file_path: '../elsewhere.ts' } }));
+    const up = run(
+      root,
+      '--from-hook',
+      JSON.stringify({ tool_input: { file_path: '../elsewhere.ts' } }),
+    );
     assert.equal(up.status, 0);
     assert.equal(changelog(root), before);
   });
 
   test('malformed, empty and field-less input exit 0 and add nothing', () => {
     const before = changelog(root);
-    for (const input of ['not json', '', '{}', '[]', 'null', JSON.stringify({ tool_input: { file_path: '' } }), JSON.stringify({ tool_input: { file_path: 42 } })]) {
+    for (const input of [
+      'not json',
+      '',
+      '{}',
+      '[]',
+      'null',
+      JSON.stringify({ tool_input: { file_path: '' } }),
+      JSON.stringify({ tool_input: { file_path: 42 } }),
+    ]) {
       const result = run(root, '--from-hook', input);
       assert.equal(result.status, 0, JSON.stringify(input));
       assert.equal(result.stderr, '', JSON.stringify(input));
@@ -138,8 +177,16 @@ describe('vault-sync --from-hook in a temporary repository', () => {
 
   test('leading byte-order marks (one or two) are stripped before parsing', () => {
     const before = entries(changelog(root));
-    const one = run(root, '--from-hook', '﻿' + JSON.stringify({ tool_input: { file_path: SPEC } }));
-    const two = run(root, '--from-hook', '﻿﻿' + JSON.stringify({ tool_input: { file_path: SPEC } }));
+    const one = run(
+      root,
+      '--from-hook',
+      '\uFEFF' + JSON.stringify({ tool_input: { file_path: SPEC } }),
+    );
+    const two = run(
+      root,
+      '--from-hook',
+      '\uFEFF\uFEFF' + JSON.stringify({ tool_input: { file_path: SPEC } }),
+    );
     assert.equal(one.status, 0);
     assert.equal(two.status, 0);
     assert.equal(entries(changelog(root)), before + 2);
@@ -153,7 +200,8 @@ describe('vault-sync --from-hook in a temporary repository', () => {
     assert.equal(second.status, 0);
     const lines = readFileSync(log, 'utf8').split('\n').filter(Boolean);
     assert.equal(lines.length, 2);
-    for (const line of lines) assert.match(line, /^- session START \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
+    for (const line of lines)
+      assert.match(line, /^- session START \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
   });
 
   test('--session-end appends an END line with the UTC time, the short commit and the uncommitted count including nested untracked files', () => {
@@ -168,9 +216,14 @@ describe('vault-sync --from-hook in a temporary repository', () => {
     const after = readFileSync(log, 'utf8');
     assert.ok(after.startsWith(before), 'earlier lines preserved');
     const last = after.trimEnd().split('\n').at(-1);
-    assert.match(last, /^- session END \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z · commit [0-9a-f]+ · uncommitted \d+ file\(s\)$/);
+    assert.match(
+      last,
+      /^- session END \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z · commit [0-9a-f]+ · uncommitted \d+ file\(s\)$/,
+    );
     assert.ok(last.includes(` · commit ${head} · `), last);
-    const expected = git(root, 'status', '--porcelain', '--untracked-files=all').stdout.split('\n').filter(Boolean).length;
+    const expected = git(root, 'status', '--porcelain', '--untracked-files=all')
+      .stdout.split('\n')
+      .filter(Boolean).length;
     assert.ok(expected >= 2, 'the nested untracked files are counted by git');
     assert.ok(last.endsWith(` · uncommitted ${expected} file(s)`), last);
     rmSync(join(root, 'brand-new'), { recursive: true, force: true });
@@ -200,7 +253,12 @@ describe('vault-sync --from-hook outside any Git repository', () => {
     const emptyConfig = join(root, 'empty-gitconfig');
     writeFileSync(emptyConfig, '');
     const noGit = { GIT_CONFIG_GLOBAL: emptyConfig, GIT_CONFIG_NOSYSTEM: '1' };
-    const result = run(root, '--from-hook', JSON.stringify({ tool_input: { file_path: SPEC } }), noGit);
+    const result = run(
+      root,
+      '--from-hook',
+      JSON.stringify({ tool_input: { file_path: SPEC } }),
+      noGit,
+    );
     assert.equal(result.status, 0, result.stderr);
     const text = changelog(root);
     assert.equal(entries(text), 1);
@@ -233,7 +291,10 @@ describe('vault-sync --from-hook in a repository without any commit', () => {
   test('--session-end without a commit writes "commit unknown" and still counts the files', () => {
     const result = run(root, '--session-end', '');
     assert.equal(result.status, 0, result.stderr);
-    const last = readFileSync(join(root, 'vault', '_changelog', 'sessions.log'), 'utf8').trimEnd().split('\n').at(-1);
+    const last = readFileSync(join(root, 'vault', '_changelog', 'sessions.log'), 'utf8')
+      .trimEnd()
+      .split('\n')
+      .at(-1);
     assert.match(last, /^- session END \S+ · commit unknown · uncommitted \d+ file\(s\)$/);
   });
 });

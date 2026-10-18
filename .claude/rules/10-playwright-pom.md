@@ -1,7 +1,7 @@
 ---
 paths:
-  - "tests/**"
-  - "pages/**"
+  - 'tests/**'
+  - 'pages/**'
 ---
 
 # Playwright and Page Objects

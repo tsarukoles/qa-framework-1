@@ -20,7 +20,9 @@ import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { hostname } from 'node:os';
 import { dirname, isAbsolute, relative, resolve } from 'node:path';
 
-const ROOT = resolve(process.env.VAULT_SYNC_ROOT || process.env.CLAUDE_PROJECT_DIR || process.cwd());
+const ROOT = resolve(
+  process.env.VAULT_SYNC_ROOT || process.env.CLAUDE_PROJECT_DIR || process.cwd(),
+);
 const VAULT = 'vault';
 const CHANGELOG_DIR = resolve(ROOT, VAULT, '_changelog');
 
@@ -60,7 +62,7 @@ function readHookInput() {
   } catch {
     return null;
   }
-  raw = raw.replace(/^﻿+/, '');
+  raw = raw.replace(/^\uFEFF+/, '');
   try {
     const parsed = JSON.parse(raw);
     return parsed && typeof parsed === 'object' ? parsed : null;
@@ -95,7 +97,10 @@ function modeFromHook() {
   if (!rel) return 0;
   const who = `${git(['config', 'user.name'], 'unknown')}@${hostname() || 'unknown'}`;
   // symbolic-ref names the branch even before its first commit; rev-parse covers a detached HEAD.
-  const branch = git(['symbolic-ref', '--short', 'HEAD'], git(['rev-parse', '--abbrev-ref', 'HEAD'], 'unknown'));
+  const branch = git(
+    ['symbolic-ref', '--short', 'HEAD'],
+    git(['rev-parse', '--abbrev-ref', 'HEAD'], 'unknown'),
+  );
   const why = git(['log', '-1', '--format=%s'], 'unknown');
   // The short ID of HEAD when the recorder ran: the saved version the edit started from.
   // It does not mean that commit contains the edit; the edit is usually still uncommitted.
@@ -116,7 +121,8 @@ function modeSessionStart() {
 function modeSessionEnd() {
   const commit = git(['rev-parse', '--short', 'HEAD'], 'unknown');
   const status = git(['status', '--porcelain', '--untracked-files=all'], '');
-  const uncommitted = status === '' ? 0 : status.split(/\r?\n/).filter((line) => line.length > 0).length;
+  const uncommitted =
+    status === '' ? 0 : status.split(/\r?\n/).filter((line) => line.length > 0).length;
   appendLine(
     resolve(CHANGELOG_DIR, 'sessions.log'),
     `- session END ${utcNow()} · commit ${commit} · uncommitted ${uncommitted} file(s)\n`,
@@ -124,7 +130,11 @@ function modeSessionEnd() {
   return 0;
 }
 
-const modes = { '--from-hook': modeFromHook, '--session-start': modeSessionStart, '--session-end': modeSessionEnd };
+const modes = {
+  '--from-hook': modeFromHook,
+  '--session-start': modeSessionStart,
+  '--session-end': modeSessionEnd,
+};
 const mode = process.argv[2];
 if (!modes[mode]) {
   console.error('usage: node scripts/vault-sync.mjs --from-hook | --session-start | --session-end');

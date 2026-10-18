@@ -18,10 +18,19 @@ const NORMAL = JSON.stringify({ stop_hook_active: false });
 function run(script, root, input = '', args = [], extraEnv = {}) {
   const env = { ...process.env, ...extraEnv };
   delete env.CLAUDE_PROJECT_DIR;
-  return spawnSync(process.execPath, [script, ...args], { cwd: root, input, encoding: 'utf8', env });
+  return spawnSync(process.execPath, [script, ...args], {
+    cwd: root,
+    input,
+    encoding: 'utf8',
+    env,
+  });
 }
 function git(root, args, extraEnv = {}) {
-  return spawnSync('git', args, { cwd: root, encoding: 'utf8', env: { ...process.env, ...extraEnv } });
+  return spawnSync('git', args, {
+    cwd: root,
+    encoding: 'utf8',
+    env: { ...process.env, ...extraEnv },
+  });
 }
 function localDate(now = new Date()) {
   const two = (n) => String(n).padStart(2, '0');
@@ -71,7 +80,11 @@ describe('stop-worklog: path and slug', () => {
       const root = makeRepo(name);
       repos.push(root);
       const result = run(STOP, root, undefined, ['--path']);
-      assert.equal(result.stdout.trim(), `vault/12-progress-report/${slug}/${localDate()}.md`, name);
+      assert.equal(
+        result.stdout.trim(),
+        `vault/12-progress-report/${slug}/${localDate()}.md`,
+        name,
+      );
     }
   });
 });
@@ -84,7 +97,8 @@ describe('stop-worklog: decisions in a temporary repository', () => {
   });
   after(() => rmSync(root, { recursive: true, force: true }));
 
-  test('a clean empty repository (no changes, no commit) -> 0', () => expectQuiet(run(STOP, root, NORMAL)));
+  test('a clean empty repository (no changes, no commit) -> 0', () =>
+    expectQuiet(run(STOP, root, NORMAL)));
 
   test('malformed input -> 0', () => {
     for (const input of ['not json', '', 'null', '[]']) expectQuiet(run(STOP, root, input));
@@ -105,7 +119,7 @@ describe('stop-worklog: decisions in a temporary repository', () => {
     expectQuiet(run(STOP, root, JSON.stringify({ stop_hook_active: true }))));
 
   test('a leading byte-order mark does not hide the decision', () =>
-    expectBlocked(run(STOP, root, '﻿' + NORMAL), slug));
+    expectBlocked(run(STOP, root, '\uFEFF' + NORMAL), slug));
 
   test('a valid "## HH:MM" heading in today\'s journal (local date) -> 0', () => {
     const file = journal(root, slug);
@@ -123,7 +137,10 @@ describe('stop-worklog: decisions in a temporary repository', () => {
   test('a commit made today with a clean tree and no entry -> 2; a commit on another day -> 0', () => {
     git(root, ['add', '.']);
     const old = '2020-01-02T10:00:00+00:00';
-    git(root, ['commit', '-q', '-m', 'old work'], { GIT_AUTHOR_DATE: old, GIT_COMMITTER_DATE: old });
+    git(root, ['commit', '-q', '-m', 'old work'], {
+      GIT_AUTHOR_DATE: old,
+      GIT_COMMITTER_DATE: old,
+    });
     expectQuiet(run(STOP, root, NORMAL));
     writeFileSync(join(root, 'notes.txt'), 'scratch two\n');
     git(root, ['add', '.']);

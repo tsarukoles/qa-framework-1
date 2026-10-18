@@ -21,10 +21,13 @@ test('BASE_URL may be absent or exactly match the selected course address', () =
   assert.equal(resolveTarget({ APP_ENV: 'dev', BASE_URL: dev }).baseURL, dev);
   assert.equal(resolveTarget({ APP_ENV: 'prod', BASE_URL: prod }).baseURL, prod);
   for (const BASE_URL of ['', ' ', prod, `${dev}/`, `${dev}/login`, 'https://other.example']) {
-    assert.throws(() => resolveTarget({ APP_ENV: 'dev', BASE_URL }), (error: Error) => {
-      assert.equal(error.message, 'BASE_URL must exactly match the selected course address.');
-      return true;
-    });
+    assert.throws(
+      () => resolveTarget({ APP_ENV: 'dev', BASE_URL }),
+      (error: Error) => {
+        assert.equal(error.message, 'BASE_URL must exactly match the selected course address.');
+        return true;
+      },
+    );
   }
 });
 

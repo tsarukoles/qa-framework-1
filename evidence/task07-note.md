@@ -4,14 +4,14 @@ Recorded 2026-10-18 on branch `week-2`. Observed results only; what was not obse
 
 ## What was built
 
-| File | Purpose |
-|---|---|
-| `scripts/hooks/session-preflight.mjs` | Prints exactly five lines at `SessionStart`: local date, branch, uncommitted file count (new folders included), newest journal path or `none yet`, `Map: vault/_map.md`. |
-| `scripts/hooks/stop-worklog.mjs` | The `Stop` reminder. `--path` prints today's journal path; otherwise it reads the Stop event and applies the five decisions below. |
-| `.claude/commands/worklog.md` | The `/worklog` command: get the path from `--path`, gather real work, append a `## HH:MM` block with Did / Worked / didn't / Next, never overwrite, never secrets. |
-| `scripts/vault-sync.mjs` `--session-end` | Appends `- session END <UTC> · commit <short> · uncommitted <n> file(s)` to `sessions.log`. |
-| `.claude/settings.json` | `SessionStart` runs the recorder and the preflight as two entries; `Stop` runs the reminder; `SessionEnd` runs `--session-end`. Earlier hooks and permissions unchanged. |
-| `safety-tests/worklog.test.mjs`, `safety-tests/vault-log.test.mjs` | Isolated checks in temporary Git repositories with local test authors. |
+| File                                                               | Purpose                                                                                                                                                                  |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `scripts/hooks/session-preflight.mjs`                              | Prints exactly five lines at `SessionStart`: local date, branch, uncommitted file count (new folders included), newest journal path or `none yet`, `Map: vault/_map.md`. |
+| `scripts/hooks/stop-worklog.mjs`                                   | The `Stop` reminder. `--path` prints today's journal path; otherwise it reads the Stop event and applies the five decisions below.                                       |
+| `.claude/commands/worklog.md`                                      | The `/worklog` command: get the path from `--path`, gather real work, append a `## HH:MM` block with Did / Worked / didn't / Next, never overwrite, never secrets.       |
+| `scripts/vault-sync.mjs` `--session-end`                           | Appends `- session END <UTC> · commit <short> · uncommitted <n> file(s)` to `sessions.log`.                                                                              |
+| `.claude/settings.json`                                            | `SessionStart` runs the recorder and the preflight as two entries; `Stop` runs the reminder; `SessionEnd` runs `--session-end`. Earlier hooks and permissions unchanged. |
+| `safety-tests/worklog.test.mjs`, `safety-tests/vault-log.test.mjs` | Isolated checks in temporary Git repositories with local test authors.                                                                                                   |
 
 Journal path for this project: `vault/12-progress-report/tsarukoles/<local date>.md` (slug from `git user.name` = `tsarukoles`).
 
@@ -19,23 +19,23 @@ Journal path for this project: `vault/12-progress-report/tsarukoles/<local date>
 
 Command: `npm run test:safety` → **63 tests, 63 passed, 0 failed** (Week 1: 6; recorder: 14; guard: 29; worklog and preflight: 14).
 
-| Case | Result |
-|---|---|
-| `--path` | prints `vault/12-progress-report/anna-kowal/<local date>.md` for user `Anna Kowal`, reads no stdin |
-| slug generation | `  Zoë Müller!! ` → `zo-m-ller`; `QA_Student 2` → `qa-student-2`; `---` and empty → `student` |
-| clean empty repository | exit 0, no output |
-| malformed input (`not json`, empty, `null`, `[]`) | exit 0 |
-| only a `.txt` change and no commit today | exit 0 (not a qualifying file) |
-| activity with no entry: an untracked `tests/new/deep/thing.spec.ts` in a new nested folder | exit 2, stderr names the exact path and `/worklog` |
-| retry: `stop_hook_active: true` with the same activity | exit 0 |
-| leading byte-order mark before the event | same decision as without it (exit 2) |
-| valid `## 10:15` heading in today's local-date journal | exit 0 |
-| a `### 10:15` line (wrong heading level) | exit 2 |
-| commit dated 2020-01-02 with a clean tree | exit 0; a commit made today with a clean tree and no entry | exit 2 |
-| preflight in a repository without a commit, two files in a new folder | exactly five lines: `Date: <local date>`, `Branch: main`, `Uncommitted: 2 file(s)`, `Latest journal: none yet`, `Map: vault/_map.md` |
-| preflight with journals under three student folders | `Latest journal: vault/12-progress-report/two/2026-03-09.md` (newest by file name, not folder) |
-| preflight outside any repository | `Branch: no-branch`, `Uncommitted: 0 file(s)`, still five lines |
-| `--session-end` | END line with UTC time, the repository's real short HEAD and the uncommitted count including two nested untracked files; `commit unknown` in a repository without a commit |
+| Case                                                                                       | Result                                                                                                                                                                     |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--path`                                                                                   | prints `vault/12-progress-report/anna-kowal/<local date>.md` for user `Anna Kowal`, reads no stdin                                                                         |
+| slug generation                                                                            | ` Zoë Müller!!` → `zo-m-ller`; `QA_Student 2` → `qa-student-2`; `---` and empty → `student`                                                                                |
+| clean empty repository                                                                     | exit 0, no output                                                                                                                                                          |
+| malformed input (`not json`, empty, `null`, `[]`)                                          | exit 0                                                                                                                                                                     |
+| only a `.txt` change and no commit today                                                   | exit 0 (not a qualifying file)                                                                                                                                             |
+| activity with no entry: an untracked `tests/new/deep/thing.spec.ts` in a new nested folder | exit 2, stderr names the exact path and `/worklog`                                                                                                                         |
+| retry: `stop_hook_active: true` with the same activity                                     | exit 0                                                                                                                                                                     |
+| leading byte-order mark before the event                                                   | same decision as without it (exit 2)                                                                                                                                       |
+| valid `## 10:15` heading in today's local-date journal                                     | exit 0                                                                                                                                                                     |
+| a `### 10:15` line (wrong heading level)                                                   | exit 2                                                                                                                                                                     |
+| commit dated 2020-01-02 with a clean tree                                                  | exit 0; a commit made today with a clean tree and no entry                                                                                                                 | exit 2 |
+| preflight in a repository without a commit, two files in a new folder                      | exactly five lines: `Date: <local date>`, `Branch: main`, `Uncommitted: 2 file(s)`, `Latest journal: none yet`, `Map: vault/_map.md`                                       |
+| preflight with journals under three student folders                                        | `Latest journal: vault/12-progress-report/two/2026-03-09.md` (newest by file name, not folder)                                                                             |
+| preflight outside any repository                                                           | `Branch: no-branch`, `Uncommitted: 0 file(s)`, still five lines                                                                                                            |
+| `--session-end`                                                                            | END line with UTC time, the repository's real short HEAD and the uncommitted count including two nested untracked files; `commit unknown` in a repository without a commit |
 
 Refusal text (actual):
 
@@ -46,13 +46,13 @@ Run /worklog (it appends a "## HH:MM" heading with Did / Worked / didn't / Next 
 
 ## Hand runs in the real project (before the hooks were connected)
 
-| Command | Result |
-|---|---|
-| `node scripts/hooks/session-preflight.mjs` | `Date: 2026-10-18` / `Branch: week-2` / `Uncommitted: 7 file(s)` / `Latest journal: none yet` / `Map: vault/_map.md` |
-| `node scripts/hooks/stop-worklog.mjs --path` | `vault/12-progress-report/tsarukoles/2026-10-18.md` |
-| normal input `{"stop_hook_active":false}` with the Task 07 files uncommitted and no journal | exit 2 with the refusal above |
-| `{"stop_hook_active":true}` | exit 0 |
-| `not json` | exit 0 |
+| Command                                                                                     | Result                                                                                                               |
+| ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `node scripts/hooks/session-preflight.mjs`                                                  | `Date: 2026-10-18` / `Branch: week-2` / `Uncommitted: 7 file(s)` / `Latest journal: none yet` / `Map: vault/_map.md` |
+| `node scripts/hooks/stop-worklog.mjs --path`                                                | `vault/12-progress-report/tsarukoles/2026-10-18.md`                                                                  |
+| normal input `{"stop_hook_active":false}` with the Task 07 files uncommitted and no journal | exit 2 with the refusal above                                                                                        |
+| `{"stop_hook_active":true}`                                                                 | exit 0                                                                                                               |
+| `not json`                                                                                  | exit 0                                                                                                               |
 
 ## The journal entry and the journal check
 

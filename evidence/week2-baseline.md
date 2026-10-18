@@ -11,13 +11,13 @@ Recorded 2026-10-18 before any Week 2 work. Commands were run from the framework
 
 ## Starting checks on main
 
-| Command | Result |
-|---|---|
-| `git pull --ff-only` | Already up to date. |
-| `npm run typecheck` | `tsc --noEmit`, exit 0, no errors. |
-| `npm run test:safety` | 6 isolated node:test checks, 6 passed, 0 failed (`safety/target.test.ts`, `safety/helpers.test.ts`). |
-| `npx playwright test --list` | 3 tests in 2 files, all `[chromium]`: `blog/categories.smoke.spec.ts` (1), `blog/home.smoke.spec.ts` (2). |
-| `npm test -- --reporter=list` | 3 passed (6.7s) on dev, one Chromium project, zero retries. |
+| Command                       | Result                                                                                                    |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `git pull --ff-only`          | Already up to date.                                                                                       |
+| `npm run typecheck`           | `tsc --noEmit`, exit 0, no errors.                                                                        |
+| `npm run test:safety`         | 6 isolated node:test checks, 6 passed, 0 failed (`safety/target.test.ts`, `safety/helpers.test.ts`).      |
+| `npx playwright test --list`  | 3 tests in 2 files, all `[chromium]`: `blog/categories.smoke.spec.ts` (1), `blog/home.smoke.spec.ts` (2). |
+| `npm test -- --reporter=list` | 3 passed (6.7s) on dev, one Chromium project, zero retries.                                               |
 
 The isolated safety checks are counted separately from the three browser tests.
 

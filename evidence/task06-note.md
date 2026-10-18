@@ -8,13 +8,13 @@ Recorded 2026-10-18 on branch `week-2`. Every result below was observed; anythin
 
 ## What was built
 
-| File | Purpose |
-|---|---|
-| `scripts/hooks/guard.mjs` | Reads one hook event from stdin, examines only the supplied input, blocks with exit 2 and `guard: BLOCKED — <reason>` on stderr, otherwise exits 0 silently. Malformed input exits 0 (fail-open). Never opens a file. |
-| `safety-tests/guard.test.mjs` | node:test checks with simulated events through `spawnSync`'s `input` option; nothing is applied. |
-| `.claude/settings.json` | `PreToolUse` with matcher `Edit\|Write` runs `node scripts/hooks/guard.mjs`. The Task 05 hooks and the permissions are unchanged. |
-| `package.json` | `test:safety` also runs `safety-tests/guard.test.mjs`. |
-| `vault/03-framework/hook-lifecycle-map.md` | `PreToolUse` row: configured, script verified, live not verified; coverage limits section. |
+| File                                       | Purpose                                                                                                                                                                                                               |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scripts/hooks/guard.mjs`                  | Reads one hook event from stdin, examines only the supplied input, blocks with exit 2 and `guard: BLOCKED — <reason>` on stderr, otherwise exits 0 silently. Malformed input exits 0 (fail-open). Never opens a file. |
+| `safety-tests/guard.test.mjs`              | node:test checks with simulated events through `spawnSync`'s `input` option; nothing is applied.                                                                                                                      |
+| `.claude/settings.json`                    | `PreToolUse` with matcher `Edit\|Write` runs `node scripts/hooks/guard.mjs`. The Task 05 hooks and the permissions are unchanged.                                                                                     |
+| `package.json`                             | `test:safety` also runs `safety-tests/guard.test.mjs`.                                                                                                                                                                |
+| `vault/03-framework/hook-lifecycle-map.md` | `PreToolUse` row: configured, script verified, live not verified; coverage limits section.                                                                                                                            |
 
 Detector prefixes are assembled from string pieces in the guard and in the tests, so neither file contains a token-shaped string (a search of both files for the literal prefixes finds nothing). No scanning exemption was added for these files.
 
@@ -22,25 +22,25 @@ Detector prefixes are assembled from string pieces in the guard and in the tests
 
 Command: `npm run test:safety`. First run with the six checks: **42 tests, 42 passed** (Week 1: 6; recorder: 12; guard: 24).
 
-| # | Blocked example (exit 2, reason shown) | Allowed example (exit 0, no refusal) |
-|---|---|---|
-| 1 | Write to `.env` → `.env is a protected file name…` | Write placeholder content to `.env.example` |
-| 2 | Edit adding a Slack-bot-shaped token → `…contains a token-shaped string…` | Edit adding a comment with the word "token" |
-| 3 | Edit changing `test(` to `test.only(` → `…adds .only…` | Edit renaming a test title |
-| 4 | Edit changing `test(` to `test.skip(` → `…adds .skip…` | Edit touching the existing `runIfEnv(test, ['dev'])` line |
-| 5 | Edit deleting one of two `expect(` lines → `…removes an assertion… (expect( calls 2 -> 1)` | Edit changing `'DEVELOPMENT'` to `'DEV'` inside the assertion |
-| 6 | Edit deleting `runIfEnv(` → `…removes a runIfEnv( call… (1 -> 0)`; Edit deleting `envGuard(` → `…removes an envGuard( call…` | Edit changing `['dev']` to `['dev', 'prod']` while keeping the call |
+| #   | Blocked example (exit 2, reason shown)                                                                                       | Allowed example (exit 0, no refusal)                                |
+| --- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| 1   | Write to `.env` → `.env is a protected file name…`                                                                           | Write placeholder content to `.env.example`                         |
+| 2   | Edit adding a Slack-bot-shaped token → `…contains a token-shaped string…`                                                    | Edit adding a comment with the word "token"                         |
+| 3   | Edit changing `test(` to `test.only(` → `…adds .only…`                                                                       | Edit renaming a test title                                          |
+| 4   | Edit changing `test(` to `test.skip(` → `…adds .skip…`                                                                       | Edit touching the existing `runIfEnv(test, ['dev'])` line           |
+| 5   | Edit deleting one of two `expect(` lines → `…removes an assertion… (expect( calls 2 -> 1)`                                   | Edit changing `'DEVELOPMENT'` to `'DEV'` inside the assertion       |
+| 6   | Edit deleting `runIfEnv(` → `…removes a runIfEnv( call… (1 -> 0)`; Edit deleting `envGuard(` → `…removes an envGuard( call…` | Edit changing `['dev']` to `['dev', 'prod']` while keeping the call |
 
 Also covered: `.env.local`, `id_rsa`, `id_ed25519`, `server.key`, `bundle.p12`, a Windows path ending in `\.env` and `config/.env.production` → 2; Atlassian-shaped and AWS-key-shaped samples and the private-key header → 2; swapping `runIfEnv(` for `envGuard(` → 2 (the helpers are counted separately); the spec-only rules ignore `env/runIfEnv.ts`.
 
 ## Quick sample and edge cases (hand-run, exit codes)
 
-| Sample | Exit | Output |
-|---|---|---|
-| Write a protected filename (`.env`) | 2 | `guard: BLOCKED — .env is a protected file name. Secrets stay in the ignored .env; a template must be named .env.example.` |
-| Remove an assertion (`expect(categories.list)…` → empty) | 2 | `guard: BLOCKED — this edit removes an assertion from categories.smoke.spec.ts (expect( calls 1 -> 0). Keep the check; move it in the same edit if it must change place.` |
-| Ordinary edit (`pages/BasePage.ts`, add a comment) | 0 | nothing |
-| Unreadable input (`not json`) | 0 | nothing |
+| Sample                                                   | Exit | Output                                                                                                                                                                    |
+| -------------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Write a protected filename (`.env`)                      | 2    | `guard: BLOCKED — .env is a protected file name. Secrets stay in the ignored .env; a template must be named .env.example.`                                                |
+| Remove an assertion (`expect(categories.list)…` → empty) | 2    | `guard: BLOCKED — this edit removes an assertion from categories.smoke.spec.ts (expect( calls 1 -> 0). Keep the check; move it in the same edit if it must change place.` |
+| Ordinary edit (`pages/BasePage.ts`, add a comment)       | 0    | nothing                                                                                                                                                                   |
+| Unreadable input (`not json`)                            | 0    | nothing                                                                                                                                                                   |
 
 Edge cases in the test file: one and two leading byte-order marks before a blocked payload still return 2 (the marks are stripped, otherwise the guard would fail open); `{}`, `[]`, `null`, `''` and a non-object `tool_input` return 0 silently; a separate assertion deletion is blocked while the same move inside one edit (delete here, add there) keeps the count and passes; `.only` that already existed in the old text and stays is not an addition.
 
@@ -56,13 +56,13 @@ How to verify live (VS Code, this folder open): Claude Code: Open in New Tab →
 
 Seventh check: for `*.spec.ts`, `waitForTimeout(` present in the new text and absent from the old text (a `Write` is checked as a whole). Reason: `guard: BLOCKED — this edit adds waitForTimeout( to <file>. Wait for the condition the test actually needs, for example await expect(locator).toBeVisible(), which retries until it is true.`
 
-| Sample | Exit |
-|---|---|
-| Edit adding `await page.waitForTimeout(3000);` after `await blog.open();` | 2 |
-| Edit adding `await expect(blog.articleItems.first()).toBeVisible();` instead | 0 |
-| Write of a spec containing `waitForTimeout(500)` | 2 |
-| Edit where the old text already had the hard wait and it stays | 0 |
-| The same text in `pages/BasePage.ts` (not a spec) | 0 |
+| Sample                                                                       | Exit |
+| ---------------------------------------------------------------------------- | ---- |
+| Edit adding `await page.waitForTimeout(3000);` after `await blog.open();`    | 2    |
+| Edit adding `await expect(blog.articleItems.first()).toBeVisible();` instead | 0    |
+| Write of a spec containing `waitForTimeout(500)`                             | 2    |
+| Edit where the old text already had the hard wait and it stays               | 0    |
+| The same text in `pages/BasePage.ts` (not a spec)                            | 0    |
 
 `npm run test:safety` after the extension: **47 tests, 47 passed, 0 failed**. No hard wait was added to any active test.
 

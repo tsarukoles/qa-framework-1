@@ -28,6 +28,13 @@ These rules apply to every file and every conversation in this project. This fil
 - When: always.
 - Check: `git check-ignore .env` prints `.env` and `git ls-files .env` prints nothing. Nothing scans staged content today; Task 08 adds that scan.
 
+## Never bypass a failing check
+
+- What: a Git hook that refuses a commit or a push has found something to fix. Fix the cause and run the commit or push again. Never use `--no-verify`, `HUSKY=0`, or any other way around a failing hook, and never ask for that.
+- When: every commit and every push, including "small" ones.
+- Check: the reviewer sees no `--no-verify` or `HUSKY=0` in the conversation or in the shell history that was shared; the pre-commit output (`secret-scan: … clean`, lint-staged) appears before each commit.
+- ⚠️ A local hook is only a reminder with teeth: it does not run on a machine where Husky was not installed, so a bypass leaves no trace in Git. The reviewed pull request is the check that remains.
+
 ## Isolated safety checks stay separate
 
 - What: the node:test checks in `safety/` run through `npm run test:safety` (tsx), never through Playwright. `playwright.config.ts` discovers only `tests/**/*.spec.ts`.

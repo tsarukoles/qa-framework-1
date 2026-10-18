@@ -37,7 +37,7 @@ function readInput() {
   } catch {
     return null;
   }
-  raw = raw.replace(/^﻿+/, '');
+  raw = raw.replace(/^\uFEFF+/, '');
   try {
     const parsed = JSON.parse(raw);
     return parsed && typeof parsed === 'object' ? parsed : null;
@@ -81,51 +81,69 @@ function main() {
 
   const filePath = typeof input.file_path === 'string' ? input.file_path : '';
   const base = basenameOf(filePath);
-  const isWrite = payload.tool_name === 'Write' || (typeof input.content === 'string' && input.new_string === undefined);
+  const isWrite =
+    payload.tool_name === 'Write' ||
+    (typeof input.content === 'string' && input.new_string === undefined);
   const newText = String(isWrite ? (input.content ?? '') : (input.new_string ?? ''));
   const oldText = isWrite ? '' : String(input.old_string ?? '');
 
   // 1 protected filename
   if (isProtectedName(base)) {
-    block(`${base} is a protected file name. Secrets stay in the ignored .env; a template must be named .env.example.`);
+    block(
+      `${base} is a protected file name. Secrets stay in the ignored .env; a template must be named .env.example.`,
+    );
   }
 
   // 2 secret-looking new content
   if (looksLikeSecret(newText)) {
-    block(`the new content of ${base || 'this file'} contains a token-shaped string. Read secrets from the environment instead of writing them into a file.`);
+    block(
+      `the new content of ${base || 'this file'} contains a token-shaped string. Read secrets from the environment instead of writing them into a file.`,
+    );
   }
 
   if (/\.spec\.ts$/.test(base)) {
     // 3 .only added
     if (/\.only\b/.test(newText) && !/\.only\b/.test(oldText)) {
-      block(`this edit adds .only to ${base}, which would silently leave every other test out of the run. Remove .only and run the whole suite.`);
+      block(
+        `this edit adds .only to ${base}, which would silently leave every other test out of the run. Remove .only and run the whole suite.`,
+      );
     }
     // 4 .skip added
     if (/\.skip\b/.test(newText) && !/\.skip\b/.test(oldText)) {
-      block(`this edit adds .skip to ${base}. Use runIfEnv(test, ['dev']) for environment eligibility, or delete the test in a reviewed commit.`);
+      block(
+        `this edit adds .skip to ${base}. Use runIfEnv(test, ['dev']) for environment eligibility, or delete the test in a reviewed commit.`,
+      );
     }
     if (!isWrite) {
       // 5 fewer expect( calls
       const expectsBefore = count(oldText, /\bexpect\s*\(/g);
       const expectsAfter = count(newText, /\bexpect\s*\(/g);
       if (expectsAfter < expectsBefore) {
-        block(`this edit removes an assertion from ${base} (expect( calls ${expectsBefore} -> ${expectsAfter}). Keep the check; move it in the same edit if it must change place.`);
+        block(
+          `this edit removes an assertion from ${base} (expect( calls ${expectsBefore} -> ${expectsAfter}). Keep the check; move it in the same edit if it must change place.`,
+        );
       }
       // 6 fewer runIfEnv( or fewer envGuard( calls, counted separately
       const railsBefore = count(oldText, /\brunIfEnv\s*\(/g);
       const railsAfter = count(newText, /\brunIfEnv\s*\(/g);
       if (railsAfter < railsBefore) {
-        block(`this edit removes a runIfEnv( call from ${base} (${railsBefore} -> ${railsAfter}). Keep the call and change the environment list inside it instead.`);
+        block(
+          `this edit removes a runIfEnv( call from ${base} (${railsBefore} -> ${railsAfter}). Keep the call and change the environment list inside it instead.`,
+        );
       }
       const guardsBefore = count(oldText, /\benvGuard\s*\(/g);
       const guardsAfter = count(newText, /\benvGuard\s*\(/g);
       if (guardsAfter < guardsBefore) {
-        block(`this edit removes an envGuard( call from ${base} (${guardsBefore} -> ${guardsAfter}). The guard must stay in front of the action that changes data.`);
+        block(
+          `this edit removes an envGuard( call from ${base} (${guardsBefore} -> ${guardsAfter}). The guard must stay in front of the action that changes data.`,
+        );
       }
     }
     // 7 hard wait added (Edit: new text vs old text; Write: the whole new content)
     if (/waitForTimeout\s*\(/.test(newText) && !/waitForTimeout\s*\(/.test(oldText)) {
-      block(`this edit adds waitForTimeout( to ${base}. Wait for the condition the test actually needs, for example await expect(locator).toBeVisible(), which retries until it is true.`);
+      block(
+        `this edit adds waitForTimeout( to ${base}. Wait for the condition the test actually needs, for example await expect(locator).toBeVisible(), which retries until it is true.`,
+      );
     }
   }
   return 0;

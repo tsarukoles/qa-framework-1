@@ -1,0 +1,2 @@
+node scripts/hooks/secret-scan.mjs
+npx lint-staged --concurrent false
