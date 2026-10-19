@@ -24,11 +24,16 @@ Applies to browser specs under `tests/` and Page Objects under `pages/`.
 ## Waits and assertions
 
 - No fixed waits: never `waitForTimeout(`. Wait for a condition with a web-first assertion such as `await expect(locator).toBeVisible()`, which retries until its timeout. Check: searching `tests/` and `pages/` for `waitForTimeout` returns nothing.
-- ⚠️ A fixed pause passes on a fast day and fails on a slow one, and no check flags it when it is added. Task 06 adds a guard for this.
+- ⚠️ A fixed pause passes on a fast day and fails on a slow one. The Task 06 guard refuses an `Edit` or `Write` that adds `waitForTimeout(` to a spec; a hard wait typed in the editor still needs review.
 - Each assertion matches the requirement the test exists for. One test proves one behaviour.
 - No exact count on a shared list that changes (`toHaveCount(6)` on the article list) unless the requirement states the count. Use `not.toHaveCount(0)` or `.first()` visibility.
 - Keep `runIfEnv(test, ['dev'])` in the `describe` block and relative paths in `goto`.
 
+## Checks that exist now
+
+- The guard (`scripts/hooks/guard.mjs`, Task 06) refuses an `Edit` or `Write` to a spec that adds `.only`, `.skip` or `waitForTimeout(`, or removes an `expect(`, `runIfEnv(` or `envGuard(` call.
+- ESLint (Task 08) reports `test.only` and `test.skip` in `tests/**/*.spec.ts` as errors, so a commit with either is refused.
+
 ## One check worth automating later
 
-A guard that refuses an edit which adds `waitForTimeout(` or `.only`, or removes an `expect(` (Task 06).
+An ESLint rule that flags `getBy` and `locator(` calls inside `tests/`. Today a text search and the reviewer catch them.
