@@ -26,7 +26,7 @@ These rules apply to every file and every conversation in this project. This fil
 
 - What: never commit `.env` or a real token; never print a secret value in chat, logs, notes, evidence or commit messages. Scripts read `.env`; Claude does not (`Read(./.env)` is denied in `.claude/settings.json`).
 - When: always.
-- Check: `git check-ignore .env` prints `.env` and `git ls-files .env` prints nothing. Nothing scans staged content today; Task 08 adds that scan.
+- Check: `git check-ignore .env` prints `.env` and `git ls-files .env` prints nothing. Before every commit, `scripts/hooks/secret-scan.mjs` scans the staged content for protected file names and token shapes (Task 08); before every `Edit` or `Write`, the guard refuses a proposal that carries a token shape (Task 06).
 
 ## Never bypass a failing check
 
@@ -39,11 +39,15 @@ These rules apply to every file and every conversation in this project. This fil
 
 - What: the node:test checks in `safety/` run through `npm run test:safety` (tsx), never through Playwright. `playwright.config.ts` discovers only `tests/**/*.spec.ts`.
 - When: when adding or moving a check.
-- Check: `npx playwright test --list` shows browser specs only (three today).
+- Check: `npx playwright test --list` shows browser specs only (five today).
+
+## Checks that exist now
+
+This file was written in Task 03. Since then: the guard on `PreToolUse` (Task 06), the staged-content secret scan and the `main` push refusal in the Git hooks (Task 08), the critical-file reminder (Task 09), and the note freshness and link checks on commit and push (Task 11). See `vault/03-framework/hook-lifecycle-map.md` and `README.md` for what each one covers and what it cannot do.
 
 ## One check worth automating later
 
-A pre-commit scan of staged content for `.env`-like filenames and token patterns (Task 08). Today the secret rule rests on `.gitignore` and review.
+A check that every data-changing call in a spec is preceded by `envGuard(`. Today only review catches a missing call.
 
 ## Shared files: tiers and cross-impact (Task 09)
 

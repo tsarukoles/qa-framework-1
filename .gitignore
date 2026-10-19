@@ -22,3 +22,5 @@ playwright/.cache/
 *.log
 .DS_Store
 Thumbs.db
+# Output of the Playwright MCP browser tool (snapshots, console logs) when it runs in this folder.
+.playwright-mcp/

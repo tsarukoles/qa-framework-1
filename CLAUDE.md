@@ -1,6 +1,6 @@
 # QA Framework
 
-Playwright + TypeScript tests for the course applications. Work on the weekly branch (`week-2`) and review before merging into `main`.
+Playwright + TypeScript tests for the course applications. Work on the weekly branch (`week-<n>`) and review before merging into `main`.
 
 ## Targets
 
@@ -17,8 +17,10 @@ Playwright + TypeScript tests for the course applications. Work on the weekly br
 - `npm test`: browser tests on dev, one Chromium project, zero retries
 - `npm run test:list`: list the browser tests without running them
 - `npm run typecheck`: `tsc --noEmit`
-- `npm run test:safety`: isolated node:test checks in `safety/` (no browser, no network)
+- `npm run test:safety`: isolated node:test checks in `safety/` and `safety-tests/` (no browser, no network)
 - `npm run test:prod`: explicit prod run; the Week 1 and Week 2 tests skip there
+- `npm run lint`, `npm run format:check`: ESLint and Prettier (`npm run format` rewrites)
+- `npm run vault:check`, `npm run vault:sync`, `npm run vault:validate`: spec-note freshness, refresh, vault links
 
 ## Three rules that apply everywhere
 
@@ -40,4 +42,5 @@ Playwright + TypeScript tests for the course applications. Work on the weekly br
 - `env/`: target resolver and the helpers `runIfEnv` and `envGuard`
 - `pages/`: one Page Object class per page; `BasePage` holds the shared code
 - `tests/blog/`: browser specs; `tests/support/`: shared teaching data
-- `safety/`: isolated checks; `evidence/`: saved drafts and verification notes
+- `safety/`, `safety-tests/`: isolated checks; `evidence/`: saved drafts and verification notes
+- `scripts/`: the recorder and the hook scripts; `vault/`: the map, the hook map, one note per spec, the journal (`/worklog`)

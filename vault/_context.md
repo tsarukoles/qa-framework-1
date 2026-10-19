@@ -1,6 +1,6 @@
 # Context: verified state, limits, next work
 
-Updated 2026-10-18 (Week 2, Task 11). The [map](_map.md) is the index; this page says what is true today.
+Updated 2026-10-19, after the Week 2 submission (pull request #2 merged with a merge commit, tag `week2-end`). The [map](_map.md) is the index; this page says what is true today.
 
 ## Verified in this build
 
@@ -23,5 +23,5 @@ Updated 2026-10-18 (Week 2, Task 11). The [map](_map.md) is the index; this page
 
 ## Next
 
-- Submit Week 2: final checks, pull-request description, review, merge, tag `week2-end`.
+- Run the live hook checks listed above in a VS Code session in this folder, then commit the first `vault/_changelog/` entries with the next task.
 - Week 3 setup: the dev database login (kept in `.env`, never in the vault) and the database tasks.
