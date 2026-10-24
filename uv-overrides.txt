@@ -1,0 +1,6 @@
+# uv override for the postgres MCP connector declared in .mcp.json.
+# postgres-mcp 0.3.0 (the newest published release) pins pglast==7.2.0, a version PyPI no longer
+# serves (checked 2026-10-24), so the course command cannot resolve. pglast 7.21 is the current 7.x
+# release and the connector starts with it. Remove this file and the --overrides argument once a
+# connector release without the dead pin is published.
+pglast==7.21

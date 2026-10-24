@@ -52,6 +52,7 @@ The block between the generated markers in each note is written by `node scripts
 - [10-playwright-pom.md](../.claude/rules/10-playwright-pom.md): locators, Page Objects, waits, assertions
 - [20-data-management.md](../.claude/rules/20-data-management.md): seed data, unique records, cleanup
 - [30-test-names.md](../.claude/rules/30-test-names.md): titles that name the action and the result
+- [30-db-postgres.md](../.claude/rules/30-db-postgres.md): the restricted database connector, the issued login's rights, the approved reads
 - [Hook lifecycle map](03-framework/hook-lifecycle-map.md): the `.claude/settings.json` hooks and their verification status
 - [.husky/pre-commit](../.husky/pre-commit) and [.husky/pre-push](../.husky/pre-push): the Git checks, with [secret-scan.mjs](../scripts/hooks/secret-scan.mjs), [vault-precommit.mjs](../scripts/hooks/vault-precommit.mjs) and [pre-push-check.mjs](../scripts/hooks/pre-push-check.mjs)
 - [validate-vault.mjs](../scripts/validate-vault.mjs): `npm run vault:validate`, the links and structure of this folder
