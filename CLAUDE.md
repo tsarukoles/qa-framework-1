@@ -36,6 +36,7 @@ Playwright + TypeScript tests for the course applications. Work on the weekly br
 | `.claude/rules/10-playwright-pom.md`  | `tests/**`, `pages/**`                    | when a matching file is read or edited |
 | `.claude/rules/20-data-management.md` | `tests/**` (including `tests/support/**`) | when a matching file is read or edited |
 | `.claude/rules/30-test-names.md`      | `tests/**`                                | when a matching file is read or edited |
+| `.claude/rules/30-db-postgres.md`     | the database and the `postgres` connector | every conversation                     |
 
 ## Layout
 
